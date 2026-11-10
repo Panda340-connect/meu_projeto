@@ -1,12 +1,17 @@
-CREATE DATABASE meu_mvc CHARACTER SET utf8mb4;
+CREATE DATABASE IF NOT EXISTS meu_mvc CHARACTER SET utf8mb4;
 USE meu_mvc;
+
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    cpf CHAR(11) NOT NULL UNIQUE,
+    birth_date DATE NOT NULL
 );
 
-INSERT INTO users (name, email) VALUES
-('Ana', 'ana@exemplo.com'),
-('Bruno', 'bruno@exemplo.com');
+INSERT INTO users (name, last_name, email, cpf, birth_date) VALUES
+('Ana', 'Silva', 'ana@exemplo.com', '52998224725', '2008-03-15'),
+('Bruno', 'Souza', 'bruno@exemplo.com', '11144477735', '2007-01-10');
