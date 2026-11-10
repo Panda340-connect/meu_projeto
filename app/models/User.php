@@ -37,4 +37,20 @@ class User
         $stmt->execute([$name, $email]);
         return (int) Database::connect()->lastInsertId();
     }
+    public static function update(int $id, array $data): bool 
+{
+    $stmt = Database::connect()->prepare(
+        'UPDATE users 
+         SET name = ?, last_name = ?, email = ?, cpf = ?, birth_date = ? 
+         WHERE id = ?'
+    );
+    return $stmt->execute([
+        $data['name'], 
+        $data['last_name'], 
+        $data['email'], 
+        $data['cpf'], 
+        $data['birth_date'], 
+        $id
+    ]);
+}
 }
