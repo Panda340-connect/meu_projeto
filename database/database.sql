@@ -14,4 +14,4 @@ CREATE TABLE users (
 
 INSERT INTO users (name, last_name, email, cpf, birth_date) VALUES
 ('Ana', 'Silva', 'ana@exemplo.com', '52998224725', '2008-03-15'),
-('Bruno', 'Souza', 'bruno@exemplo.com', '11144477735', '2007-01-11');
+('Bruno', 'Souza', 'bruno@exemplo.com', '11144477735', '2007-01-10');
