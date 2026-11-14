@@ -4,6 +4,8 @@ namespace App\Models;
 
 use PDO;
 
+require_once __DIR__ . '/Database.php';
+
 class Usuario
 {
     public static function all(): array
