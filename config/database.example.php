@@ -1,8 +1,7 @@
 <?php
 return [
     'host' => 'localhost',
-    'name' => '',
-    'user' => '',
-    'pass' => '',
-    'charset' => 'utf8mb4',
+    'name' => 'projeto_idoso', 
+    'user' => 'root',
+    'pass' => '' 
 ];
