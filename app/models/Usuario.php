@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Database;
 use PDO;
 
 class Usuario
@@ -10,14 +9,14 @@ class Usuario
     public static function all(): array
     {
         $db = Database::connect();
-        $stmt = $db->query("SELECT * FROM usuarios ORDER BY id DESC");
+        $stmt = $db->query("SELECT * FROM usuario ORDER BY id_usuario DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function find(int $id): ?array
     {
         $db = Database::connect();
-        $stmt = $db->prepare("SELECT * FROM usuarios WHERE id = ?");
+        $stmt = $db->prepare("SELECT * FROM usuario WHERE id_usuario = ?");
         $stmt->execute([$id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         return $user ?: null;
@@ -26,13 +25,14 @@ class Usuario
     public static function create(array $data): int
     {
         $db = Database::connect();
-        $stmt = $db->prepare("INSERT INTO usuarios (name, last_name, email, cpf, birth_date) VALUES (?, ?, ?, ?, ?)");
+        $sql = "INSERT INTO usuario (nome, email, senha, telefone, tipo_usuario) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $db->prepare($sql);
         $stmt->execute([
-            $data['name'] ?? '',
-            $data['last_name'] ?? '',
+            $data['nome'] ?? '',
             $data['email'] ?? '',
-            $data['cpf'] ?? '',
-            $data['birth_date'] ?? null
+            $data['senha'] ?? '',
+            $data['telefone'] ?? null,
+            $data['tipo_usuario'] ?? 'Idoso'
         ]);
         return (int) $db->lastInsertId();
     }
@@ -40,13 +40,14 @@ class Usuario
     public static function update(int $id, array $data): bool
     {
         $db = Database::connect();
-        $stmt = $db->prepare("UPDATE usuarios SET name = ?, last_name = ?, email = ?, cpf = ?, birth_date = ? WHERE id = ?");
+        $sql = "UPDATE usuario SET nome = ?, email = ?, senha = ?, telefone = ?, tipo_usuario = ? WHERE id_usuario = ?";
+        $stmt = $db->prepare($sql);
         return $stmt->execute([
-            $data['name'] ?? '',
-            $data['last_name'] ?? '',
+            $data['nome'] ?? '',
             $data['email'] ?? '',
-            $data['cpf'] ?? '',
-            $data['birth_date'] ?? null,
+            $data['senha'] ?? '',
+            $data['telefone'] ?? null,
+            $data['tipo_usuario'] ?? 'Idoso',
             $id
         ]);
     }
@@ -54,7 +55,7 @@ class Usuario
     public static function delete(int $id): bool
     {
         $db = Database::connect();
-        $stmt = $db->prepare("DELETE FROM usuarios WHERE id = ?");
+        $stmt = $db->prepare("DELETE FROM usuario WHERE id_usuario = ?");
         return $stmt->execute([$id]);
     }
 }
