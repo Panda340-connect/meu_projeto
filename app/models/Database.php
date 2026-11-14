@@ -1,24 +1,26 @@
 <?php
-namespace App\Models;
 
-use PDO;
+class Database {
+    private static $instance = null;
 
-class Database
-{
-    private static ?PDO $pdo = null;
+    public static function getConnection() {
+        if (self::$instance === null) {
+          
+            $config = require __DIR__ . '/../../config/database.php';
 
-    public static function connect(): PDO
-    {
-        $db = require __DIR__ . '/../../config/database.php';
+            try {
+                $dsn = "mysql:host={$config['host']};dbname={$config['name']};charset=utf8mb4";
+                
+                self::$instance = new PDO($dsn, $config['user'], $config['pass'], [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                ]);
+            } catch (PDOException $e) {
+                // Se der erro na conexão, exibe a mensagem
+                die("Erro na conexão com o banco de dados: " . $e->getMessage());
+            }
+        }
 
-        return self::$pdo ??= new PDO(
-            "mysql:host={$db['host']};dbname={$db['name']};charset={$db['charset']}",
-            $db['user'],
-            $db['pass'],
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
+        return self::$instance;
     }
 }
