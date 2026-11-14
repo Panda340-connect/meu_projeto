@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     telefone VARCHAR(20),
-    tipo_usuario VARCHAR(50)
+    tipo_usuario VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS consulta (
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS consulta (
 
 CREATE TABLE IF NOT EXISTS refeicao (
     id_refeicao INT AUTO_INCREMENT PRIMARY KEY,
-    nome_refeicao VARCHAR(100) NOT NULL,
+    nome_refeicao VARCHAR(50) NOT NULL,
     descricao VARCHAR(255),
     horario TIME NOT NULL,
     id_usuario INT NOT NULL,
