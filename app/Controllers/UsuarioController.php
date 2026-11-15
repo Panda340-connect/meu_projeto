@@ -5,26 +5,39 @@ namespace App\Controllers;
 use App\Models\Usuario;
 use App\Validators\UsuarioValidator;
 
+require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../validators/UsuarioValidator.php';
+
 class UsuarioController
 {
+    private function render(string $view, array $data = []): void
+    {
+        extract($data);
+        $viewFile = __DIR__ . '/../views/' . $view . '.php';
+        ob_start();
+        if (file_exists($viewFile)) {
+            require $viewFile;
+        }
+        $content = ob_get_clean();
+        require __DIR__ . '/../views/layouts/main.php';
+    }
+
     public function index(): void
     {
         $usuarios = Usuario::all();
-        $title = "Listagem de Usuários";
-        
-        require __DIR__ . '/../views/usuarios/index.php';
+        $this->render('usuarios/index', [
+            'title'    => 'Usuários Cadastrados',
+            'usuarios' => $usuarios
+        ]);
     }
 
     public function create(): void
     {
-        $title = "Novo Usuário";
-        $csrf = $_SESSION['csrf'] ?? '';
-        $old = $_SESSION['old'] ?? [];
-        $errors = $_SESSION['errors'] ?? [];
-
-        unset($_SESSION['old'], $_SESSION['errors']);
-
-        require __DIR__ . '/../views/usuarios/form.php';
+        $this->render('usuarios/form', [
+            'title'  => 'Novo Usuário',
+            'errors' => [],
+            'old'    => []
+        ]);
     }
 
     public function store(): void
@@ -33,10 +46,12 @@ class UsuarioController
         $errors = UsuarioValidator::validate($data);
 
         if (!empty($errors)) {
-            $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $data;
-            header('Location: ' . url('usuario/create'));
-            exit;
+            $this->render('usuarios/form', [
+                'title'  => 'Novo Usuário',
+                'errors' => $errors,
+                'old'    => $data
+            ]);
+            return;
         }
 
         Usuario::create($data);
@@ -44,45 +59,33 @@ class UsuarioController
         exit;
     }
 
-    public function edit(int $id): void
+    public function edit(int $id = 0): void
     {
+        $id = $id ?: (int) ($_GET['id'] ?? 0);
         $usuario = Usuario::find($id);
 
-        if (!$usuario) {
-            header('Location: ' . url('usuario/index'));
-            exit;
-        }
-
-        $title = "Editar Usuário";
-        $csrf = $_SESSION['csrf'] ?? '';
-        $old = $_SESSION['old'] ?? $usuario;
-        $errors = $_SESSION['errors'] ?? [];
-
-        unset($_SESSION['old'], $_SESSION['errors']);
-
-        require __DIR__ . '/../views/usuarios/edit.php';
+        $this->render('usuarios/edit', [
+            'title'   => 'Editar Usuário',
+            'usuario' => $usuario,
+            'errors'  => []
+        ]);
     }
 
-    public function update(int $id): void
+    public function update(int $id = 0): void
     {
+        $id = $id ?: (int) ($_POST['id'] ?? $_GET['id'] ?? 0);
         $data = $_POST;
-        $errors = UsuarioValidator::validate($data);
-
-        if (!empty($errors)) {
-            $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $data;
-            header('Location: ' . url('usuario/edit/' . $id));
-            exit;
-        }
-
         Usuario::update($id, $data);
         header('Location: ' . url('usuario/index'));
         exit;
     }
 
-    public function delete(int $id): void
+    public function delete(int $id = 0): void
     {
-        Usuario::delete($id);
+        $id = $id ?: (int) ($_POST['id'] ?? $_GET['id'] ?? 0);
+        if ($id > 0) {
+            Usuario::delete($id);
+        }
         header('Location: ' . url('usuario/index'));
         exit;
     }
