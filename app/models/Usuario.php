@@ -2,26 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\Database;
 use PDO;
-
-require_once __DIR__ . '/Database.php';
 
 class Usuario
 {
     public static function all(): array
     {
         $db = Database::connect();
-        $stmt = $db->query("SELECT * FROM usuario ORDER BY id_usuario DESC");
+        $stmt = $db->query("SELECT id_usuario, nome, email, telefone, tipo_usuario FROM usuario ORDER BY id_usuario DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function find(int $id): ?array
     {
         $db = Database::connect();
-        $stmt = $db->prepare("SELECT * FROM usuario WHERE id_usuario = ?");
+        $stmt = $db->prepare("SELECT id_usuario, nome, email, telefone, tipo_usuario FROM usuario WHERE id_usuario = ?");
         $stmt->execute([$id]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $user ?: null;
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $usuario ?: null;
     }
 
     public static function create(array $data): int
@@ -32,7 +31,7 @@ class Usuario
         $stmt->execute([
             $data['nome'] ?? '',
             $data['email'] ?? '',
-            $data['senha'] ?? '',
+            password_hash($data['senha'] ?? '', PASSWORD_DEFAULT),
             $data['telefone'] ?? null,
             $data['tipo_usuario'] ?? 'Idoso'
         ]);
@@ -42,12 +41,25 @@ class Usuario
     public static function update(int $id, array $data): bool
     {
         $db = Database::connect();
-        $sql = "UPDATE usuario SET nome = ?, email = ?, senha = ?, telefone = ?, tipo_usuario = ? WHERE id_usuario = ?";
+
+        if (!empty($data['senha'])) {
+            $sql = "UPDATE usuario SET nome = ?, email = ?, senha = ?, telefone = ?, tipo_usuario = ? WHERE id_usuario = ?";
+            $stmt = $db->prepare($sql);
+            return $stmt->execute([
+                $data['nome'] ?? '',
+                $data['email'] ?? '',
+                password_hash($data['senha'], PASSWORD_DEFAULT),
+                $data['telefone'] ?? null,
+                $data['tipo_usuario'] ?? 'Idoso',
+                $id
+            ]);
+        }
+
+        $sql = "UPDATE usuario SET nome = ?, email = ?, telefone = ?, tipo_usuario = ? WHERE id_usuario = ?";
         $stmt = $db->prepare($sql);
         return $stmt->execute([
             $data['nome'] ?? '',
             $data['email'] ?? '',
-            $data['senha'] ?? '',
             $data['telefone'] ?? null,
             $data['tipo_usuario'] ?? 'Idoso',
             $id
