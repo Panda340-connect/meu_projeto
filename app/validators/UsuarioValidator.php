@@ -4,12 +4,12 @@ namespace App\Validators;
 
 class UsuarioValidator
 {
-    public static function validate(array $data): array
+    public static function validate(array $data, bool $isUpdate = false): array
     {
         $errors = [];
 
-        if (empty(trim($data['name'] ?? ''))) {
-            $errors['name'] = "O campo nome é obrigatório.";
+        if (empty(trim($data['nome'] ?? ''))) {
+            $errors['nome'] = "O campo nome é obrigatório.";
         }
 
         if (empty(trim($data['email'] ?? ''))) {
@@ -18,12 +18,20 @@ class UsuarioValidator
             $errors['email'] = "O e-mail informado é inválido.";
         }
 
-        if (empty(trim($data['cpf'] ?? ''))) {
-            $errors['cpf'] = "O campo CPF é obrigatório.";
+        if (!$isUpdate && empty(trim($data['senha'] ?? ''))) {
+            $errors['senha'] = "O campo senha é obrigatório.";
         }
 
-        if (empty(trim($data['birth_date'] ?? ''))) {
-            $errors['birth_date'] = "O campo data de nascimento é obrigatório.";
+        if (!empty(trim($data['telefone'] ?? '')) && strlen(preg_replace('/\D/', '', $data['telefone'])) < 10) {
+            $errors['telefone'] = "Informe um telefone válido com DDD.";
+        }
+
+        $tiposPermitidos = ['Idoso', 'Cuidador', 'Familiar', 'Administrador'];
+        $tipo = trim($data['tipo_usuario'] ?? '');
+        if (empty($tipo)) {
+            $errors['tipo_usuario'] = "O campo tipo de usuário é obrigatório.";
+        } elseif (!in_array($tipo, $tiposPermitidos, true)) {
+            $errors['tipo_usuario'] = "Tipo de usuário inválido.";
         }
 
         return $errors;
