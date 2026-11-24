@@ -19,6 +19,15 @@ class Consulta
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function find(int $id_consulta): ?array
+    {
+        $db = Database::connect();
+        $stmt = $db->prepare("SELECT * FROM consulta WHERE id_consulta = ?");
+        $stmt->execute([$id_consulta]);
+        $consulta = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $consulta ?: null;
+    }
+
     public static function getUsuarios(): array
     {
         $db = Database::connect();
@@ -33,13 +42,38 @@ class Consulta
                 VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
         $stmt->execute([
-            $data['especialidade'] ?? '',
-            $data['nome_medico'] ?? null,
+            trim($data['especialidade'] ?? ''),
+            trim($data['nome_medico'] ?? '') ?: null,
             $data['data_consulta'] ?? '',
             $data['horario'] ?? '',
-            $data['local'] ?? null,
+            trim($data['local'] ?? '') ?: null,
             (int) ($data['id_usuario'] ?? 0)
         ]);
         return (int) $db->lastInsertId();
+    }
+
+    public static function update(int $id_consulta, array $data): bool
+    {
+        $db = Database::connect();
+        $sql = "UPDATE consulta 
+                SET especialidade = ?, nome_medico = ?, data_consulta = ?, horario = ?, local = ?, id_usuario = ? 
+                WHERE id_consulta = ?";
+        $stmt = $db->prepare($sql);
+        return $stmt->execute([
+            trim($data['especialidade'] ?? ''),
+            trim($data['nome_medico'] ?? '') ?: null,
+            $data['data_consulta'] ?? '',
+            $data['horario'] ?? '',
+            trim($data['local'] ?? '') ?: null,
+            (int) ($data['id_usuario'] ?? 0),
+            $id_consulta
+        ]);
+    }
+
+    public static function delete(int $id_consulta): bool
+    {
+        $db = Database::connect();
+        $stmt = $db->prepare("DELETE FROM consulta WHERE id_consulta = ?");
+        return $stmt->execute([$id_consulta]);
     }
 }
