@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+require_once __DIR__ . '/../models/Exercicio.php';
+require_once __DIR__ . '/../validators/ExercicioValidator.php';
+
 use App\Models\Exercicio;
 use App\Validators\ExercicioValidator;
 
