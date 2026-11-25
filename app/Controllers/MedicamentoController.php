@@ -1,45 +1,141 @@
 <?php
 
-namespace App\Validators;
+namespace App\Controllers;
 
-class MedicamentoValidator
+use App\Models\Medicamento;
+use App\Validators\MedicamentoValidator;
+
+require_once __DIR__ . '/../models/Medicamento.php';
+require_once __DIR__ . '/../validators/MedicamentoValidator.php';
+
+class MedicamentoController
 {
-    public static function validate(array $data): array
+    private function render(string $view, array $data = []): void
     {
-        $errors = [];
+        extract($data);
+        $viewFile = __DIR__ . '/../views/' . $view . '.php';
+        ob_start();
+        require $viewFile;
+        $content = ob_get_clean();
+        require __DIR__ . '/../views/layouts/main.php';
+    }
 
-        $nomeMedicamento = trim($data['nome_medicamento'] ?? '');
-        $dosagem = trim($data['dosagem'] ?? '');
-        $horario = trim($data['horario'] ?? '');
-        $frequencia = trim($data['frequencia'] ?? '');
-        $idUsuario = (int) ($data['id_usuario'] ?? 0);
+    private function resolveId(int $id = 0): int
+    {
+        if ($id > 0) {
+            return $id;
+        }
+        if (!empty($_POST['id_medicamento'])) {
+            return (int) $_POST['id_medicamento'];
+        }
+        if (!empty($_POST['id'])) {
+            return (int) $_POST['id'];
+        }
+        if (!empty($_GET['id'])) {
+            return (int) $_GET['id'];
+        }
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+        if (preg_match('#/(\d+)/?$#', $uri, $matches)) {
+            return (int) $matches[1];
+        }
+        return 0;
+    }
 
-        if ($nomeMedicamento === '') {
-            $errors['nome_medicamento'] = 'Informe o nome do medicamento.';
-        } elseif (mb_strlen($nomeMedicamento) > 100) {
-            $errors['nome_medicamento'] = 'O nome do medicamento deve ter no máximo 100 caracteres.';
+    public function index(): void
+    {
+        $medicamentos = Medicamento::all();
+        $this->render('medicamentos/index', [
+            'title' => 'Medicamentos',
+            'medicamentos' => $medicamentos,
+        ]);
+    }
+
+    public function create(): void
+    {
+        $usuarios = Medicamento::getUsuarios();
+        $this->render('medicamentos/form', [
+            'title' => 'Cadastrar Medicamento',
+            'usuarios' => $usuarios,
+            'errors' => [],
+            'old' => [],
+        ]);
+    }
+
+    public function store(): void
+    {
+        $data = $_POST;
+        $errors = MedicamentoValidator::validate($data);
+
+        if (!empty($errors)) {
+            $usuarios = Medicamento::getUsuarios();
+            $this->render('medicamentos/form', [
+                'title' => 'Cadastrar Medicamento',
+                'usuarios' => $usuarios,
+                'errors' => $errors,
+                'old' => $data,
+            ]);
+            return;
         }
 
-        if ($dosagem === '') {
-            $errors['dosagem'] = 'Informe a dosagem.';
-        } elseif (mb_strlen($dosagem) > 50) {
-            $errors['dosagem'] = 'A dosagem deve ter no máximo 50 caracteres.';
+        Medicamento::create($data);
+        header('Location: ' . url('medicamento/index'));
+        exit;
+    }
+
+    public function edit(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        $medicamento = $id > 0 ? Medicamento::find($id) : null;
+
+        if (!$medicamento) {
+            header('Location: ' . url('medicamento/index'));
+            exit;
         }
 
-        if ($horario === '') {
-            $errors['horario'] = 'Informe o horário do medicamento.';
+        $usuarios = Medicamento::getUsuarios();
+        $this->render('medicamentos/edit', [
+            'title' => 'Editar Medicamento',
+            'medicamento' => $medicamento,
+            'usuarios' => $usuarios,
+            'errors' => [],
+        ]);
+    }
+
+    public function update(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        if ($id <= 0) {
+            header('Location: ' . url('medicamento/index'));
+            exit;
         }
 
-        if ($frequencia === '') {
-            $errors['frequencia'] = 'Informe a frequência.';
-        } elseif (mb_strlen($frequencia) > 50) {
-            $errors['frequencia'] = 'A frequência deve ter no máximo 50 caracteres.';
+        $data = $_POST;
+        $errors = MedicamentoValidator::validate($data);
+
+        if (!empty($errors)) {
+            $usuarios = Medicamento::getUsuarios();
+            $data['id_medicamento'] = $id;
+            $this->render('medicamentos/edit', [
+                'title' => 'Editar Medicamento',
+                'medicamento' => $data,
+                'usuarios' => $usuarios,
+                'errors' => $errors,
+            ]);
+            return;
         }
 
-        if ($idUsuario <= 0) {
-            $errors['id_usuario'] = 'Selecione um usuário válido.';
-        }
+        Medicamento::update($id, $data);
+        header('Location: ' . url('medicamento/index'));
+        exit;
+    }
 
-        return $errors;
+    public function delete(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        if ($id > 0) {
+            Medicamento::delete($id);
+        }
+        header('Location: ' . url('medicamento/index'));
+        exit;
     }
 }
