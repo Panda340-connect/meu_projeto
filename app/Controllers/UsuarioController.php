@@ -7,24 +7,49 @@ use App\Validators\UsuarioValidator;
 
 class UsuarioController
 {
+    public function __construct()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    private function render(string $view, array $data = []): void
+    {
+        extract($data);
+        $viewFile = __DIR__ . '/../views/' . $view . '.php';
+        ob_start();
+        if (file_exists($viewFile)) {
+            require $viewFile;
+        }
+        $content = ob_get_clean();
+        require __DIR__ . '/../views/layouts/main.php';
+    }
+
     public function index(): void
     {
         $usuarios = Usuario::all();
-        $title = "Listagem de Usuários";
 
-        require __DIR__ . '/../views/usuarios/index.php';
+        $this->render('usuarios/index', [
+            'title' => 'Listagem de Usuários',
+            'usuarios' => $usuarios,
+        ]);
     }
 
     public function create(): void
     {
-        $title = "Novo Usuário";
         $csrf = $_SESSION['csrf'] ?? '';
         $old = $_SESSION['old'] ?? [];
         $errors = $_SESSION['errors'] ?? [];
 
         unset($_SESSION['old'], $_SESSION['errors']);
 
-        require __DIR__ . '/../views/usuarios/form.php';
+        $this->render('usuarios/form', [
+            'title' => 'Novo Usuário',
+            'csrf' => $csrf,
+            'old' => $old,
+            'errors' => $errors,
+        ]);
     }
 
     public function store(): void
@@ -53,14 +78,19 @@ class UsuarioController
             exit;
         }
 
-        $title = "Editar Usuário";
         $csrf = $_SESSION['csrf'] ?? '';
         $old = $_SESSION['old'] ?? $usuario;
         $errors = $_SESSION['errors'] ?? [];
 
         unset($_SESSION['old'], $_SESSION['errors']);
 
-        require __DIR__ . '/../views/usuarios/edit.php';
+        $this->render('usuarios/edit', [
+            'title' => 'Editar Usuário',
+            'usuario' => $usuario,
+            'csrf' => $csrf,
+            'old' => $old,
+            'errors' => $errors,
+        ]);
     }
 
     public function update(int $id): void
@@ -85,6 +115,5 @@ class UsuarioController
         Usuario::delete($id);
         header('Location: ' . url('usuario/index'));
         exit;
-    
     }
 }
