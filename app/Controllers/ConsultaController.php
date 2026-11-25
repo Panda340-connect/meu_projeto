@@ -20,6 +20,27 @@ class ConsultaController
         require __DIR__ . '/../views/layouts/main.php';
     }
 
+    private function resolveId(int $id = 0): int
+    {
+        if ($id > 0) {
+            return $id;
+        }
+        if (!empty($_POST['id_consulta'])) {
+            return (int) $_POST['id_consulta'];
+        }
+        if (!empty($_POST['id'])) {
+            return (int) $_POST['id'];
+        }
+        if (!empty($_GET['id'])) {
+            return (int) $_GET['id'];
+        }
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+        if (preg_match('#/(\d+)/?$#', $uri, $matches)) {
+            return (int) $matches[1];
+        }
+        return 0;
+    }
+
     public function index(): void
     {
         $consultas = Consulta::all();
@@ -57,6 +78,63 @@ class ConsultaController
         }
 
         Consulta::create($data);
+        header('Location: ' . url('consulta/index'));
+        exit;
+    }
+
+    public function edit(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        $consulta = $id > 0 ? Consulta::find($id) : null;
+
+        if (!$consulta) {
+            header('Location: ' . url('consulta/index'));
+            exit;
+        }
+
+        $usuarios = Consulta::getUsuarios();
+        $this->render('consultas/edit', [
+            'title'    => 'Editar Consulta',
+            'consulta' => $consulta,
+            'usuarios' => $usuarios,
+            'errors'   => []
+        ]);
+    }
+
+    public function update(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        if ($id <= 0) {
+            header('Location: ' . url('consulta/index'));
+            exit;
+        }
+
+        $data = $_POST;
+        $errors = ConsultaValidator::validate($data);
+
+        if (!empty($errors)) {
+            $usuarios = Consulta::getUsuarios();
+            $data['id_consulta'] = $id;
+            $this->render('consultas/edit', [
+                'title'    => 'Editar Consulta',
+                'consulta' => $data,
+                'usuarios' => $usuarios,
+                'errors'   => $errors
+            ]);
+            return;
+        }
+
+        Consulta::update($id, $data);
+        header('Location: ' . url('consulta/index'));
+        exit;
+    }
+
+    public function delete(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        if ($id > 0) {
+            Consulta::delete($id);
+        }
         header('Location: ' . url('consulta/index'));
         exit;
     }
