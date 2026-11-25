@@ -12,11 +12,16 @@ spl_autoload_register(function (string $class) {
 });
 require __DIR__ . '/../app/helpers.php';
 
-// 2) Interpretação da URL (ALTERADO: rota padrão para 'usuario/index')
+// 2) Interpretação da URL (rota padrão: 'usuario/index')
 $url = explode('/', trim(($_GET['url'] ?? '') ?: 'usuario/index', '/'));
 $controller = 'App\\Controllers\\' . ucfirst($url[0]) . 'Controller';
 $method = $url[1] ?? 'index';
-$params = array_slice($url, 2);
+
+// Converte parâmetros numéricos da URL (ex.: '2') de string para int (2)
+$params = array_map(
+    fn(string $p) => ctype_digit($p) ? (int) $p : $p,
+    array_slice($url, 2)
+);
 
 // 3) Validação e despacho
 if (!class_exists($controller) || !method_exists($controller, $method)) {
