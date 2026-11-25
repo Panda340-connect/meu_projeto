@@ -1,38 +1,141 @@
 <?php
 
-namespace App\Validators;
+namespace App\Controllers;
 
-class RefeicaoValidator
+use App\Models\Refeicao;
+use App\Validators\RefeicaoValidator;
+
+require_once __DIR__ . '/../models/Refeicao.php';
+require_once __DIR__ . '/../validators/RefeicaoValidator.php';
+
+class RefeicaoController
 {
-    public static function validate(array $data): array
+    private function render(string $view, array $data = []): void
     {
-        $errors = [];
+        extract($data);
+        $viewFile = __DIR__ . '/../views/' . $view . '.php';
+        ob_start();
+        require $viewFile;
+        $content = ob_get_clean();
+        require __DIR__ . '/../views/layouts/main.php';
+    }
 
-        $nomeRefeicao = trim($data['nome_refeicao'] ?? '');
-        $descricao = trim($data['descricao'] ?? '');
-        $horario = trim($data['horario'] ?? '');
-        $idUsuario = (int) ($data['id_usuario'] ?? 0);
+    private function resolveId(int $id = 0): int
+    {
+        if ($id > 0) {
+            return $id;
+        }
+        if (!empty($_POST['id_refeicao'])) {
+            return (int) $_POST['id_refeicao'];
+        }
+        if (!empty($_POST['id'])) {
+            return (int) $_POST['id'];
+        }
+        if (!empty($_GET['id'])) {
+            return (int) $_GET['id'];
+        }
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+        if (preg_match('#/(\d+)/?$#', $uri, $matches)) {
+            return (int) $matches[1];
+        }
+        return 0;
+    }
 
-        if ($nomeRefeicao === '') {
-            $errors['nome_refeicao'] = 'Informe o nome da refeição.';
-        } elseif (mb_strlen($nomeRefeicao) > 50) {
-            $errors['nome_refeicao'] = 'O nome da refeição deve ter no máximo 50 caracteres.';
+    public function index(): void
+    {
+        $refeicoes = Refeicao::all();
+        $this->render('refeicoes/index', [
+            'title' => 'Refeições',
+            'refeicoes' => $refeicoes,
+        ]);
+    }
+
+    public function create(): void
+    {
+        $usuarios = Refeicao::getUsuarios();
+        $this->render('refeicoes/form', [
+            'title' => 'Cadastrar Refeição',
+            'usuarios' => $usuarios,
+            'errors' => [],
+            'old' => [],
+        ]);
+    }
+
+    public function store(): void
+    {
+        $data = $_POST;
+        $errors = RefeicaoValidator::validate($data);
+
+        if (!empty($errors)) {
+            $usuarios = Refeicao::getUsuarios();
+            $this->render('refeicoes/form', [
+                'title' => 'Cadastrar Refeição',
+                'usuarios' => $usuarios,
+                'errors' => $errors,
+                'old' => $data,
+            ]);
+            return;
         }
 
-        if ($descricao === '') {
-            $errors['descricao'] = 'Informe a descrição da refeição.';
-        } elseif (mb_strlen($descricao) > 255) {
-            $errors['descricao'] = 'A descrição deve ter no máximo 255 caracteres.';
+        Refeicao::create($data);
+        header('Location: ' . url('refeicao/index'));
+        exit;
+    }
+
+    public function edit(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        $refeicao = $id > 0 ? Refeicao::find($id) : null;
+
+        if (!$refeicao) {
+            header('Location: ' . url('refeicao/index'));
+            exit;
         }
 
-        if ($horario === '') {
-            $errors['horario'] = 'Informe o horário da refeição.';
+        $usuarios = Refeicao::getUsuarios();
+        $this->render('refeicoes/edit', [
+            'title' => 'Editar Refeição',
+            'refeicao' => $refeicao,
+            'usuarios' => $usuarios,
+            'errors' => [],
+        ]);
+    }
+
+    public function update(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        if ($id <= 0) {
+            header('Location: ' . url('refeicao/index'));
+            exit;
         }
 
-        if ($idUsuario <= 0) {
-            $errors['id_usuario'] = 'Selecione um usuário válido.';
+        $data = $_POST;
+        $errors = RefeicaoValidator::validate($data);
+
+        if (!empty($errors)) {
+            $usuarios = Refeicao::getUsuarios();
+            $data['id_refeicao'] = $id;
+            $this->render('refeicoes/edit', [
+                'title' => 'Editar Refeição',
+                'refeicao' => $data,
+                'usuarios' => $usuarios,
+                'errors' => $errors,
+            ]);
+            return;
         }
 
-        return $errors;
+        Refeicao::update($id, $data);
+        header('Location: ' . url('refeicao/index'));
+        exit;
+    }
+
+    public function delete(int $id = 0): void
+    {
+        $id = $this->resolveId($id);
+        if ($id > 0) {
+            Refeicao::delete($id);
+        }
+        header('Location: ' . url('refeicao/index'));
+        exit;
     }
 }
