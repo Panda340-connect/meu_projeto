@@ -1,42 +1,48 @@
 <h1><?= e($title) ?></h1>
 <a href="<?= e(url('usuario/index')) ?>">Voltar</a>
 
-<form method="post" action="<?= url('usuario/update/' . (int) $usuario['id']) ?>" data-validate>
+<form method="post" action="<?= url('usuario/update/' . (int) $usuario['id_usuario']) ?>" data-validate>
     <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
-    
-    <label>Nome
-        <input name="name" value="<?= e($old['name'] ?? '') ?>">
-    </label>
-    <?php if (isset($errors['name'])): ?>
-        <p class="erro"><?= e($errors['name']) ?></p>
-    <?php endif; ?>
 
-    <label>Sobrenome
-        <input name="last_name" value="<?= e($old['last_name'] ?? '') ?>">
+    <label>Nome
+        <input type="text" name="nome" value="<?= e($old['nome'] ?? '') ?>">
     </label>
-    <?php if (isset($errors['last_name'])): ?>
-        <p class="erro"><?= e($errors['last_name']) ?></p>
+    <?php if (isset($errors['nome'])): ?>
+        <p class="erro"><?= e($errors['nome']) ?></p>
     <?php endif; ?>
 
     <label>E-mail
-        <input name="email" value="<?= e($old['email'] ?? '') ?>">
+        <input type="email" name="email" value="<?= e($old['email'] ?? '') ?>">
     </label>
     <?php if (isset($errors['email'])): ?>
         <p class="erro"><?= e($errors['email']) ?></p>
     <?php endif; ?>
 
-    <label>CPF
-        <input name="cpf" maxlength="14" placeholder="000.000.000-00" value="<?= e($old['cpf'] ?? '') ?>">
+    <label>Senha (deixe em branco para manter a atual)
+        <input type="password" name="senha">
     </label>
-    <?php if (isset($errors['cpf'])): ?>
-        <p class="erro"><?= e($errors['cpf']) ?></p>
+    <?php if (isset($errors['senha'])): ?>
+        <p class="erro"><?= e($errors['senha']) ?></p>
     <?php endif; ?>
 
-    <label>Data de Nascimento
-        <input type="date" name="birth_date" value="<?= e($old['birth_date'] ?? '') ?>">
+    <label>Telefone
+        <input type="text" name="telefone" placeholder="(00) 00000-0000" value="<?= e($old['telefone'] ?? '') ?>">
     </label>
-    <?php if (isset($errors['birth_date'])): ?>
-        <p class="erro"><?= e($errors['birth_date']) ?></p>
+    <?php if (isset($errors['telefone'])): ?>
+        <p class="erro"><?= e($errors['telefone']) ?></p>
+    <?php endif; ?>
+
+    <label>Tipo de Usuário
+        <select name="tipo_usuario">
+            <?php $tipoAtual = $old['tipo_usuario'] ?? 'Idoso'; ?>
+            <option value="Idoso" <?= $tipoAtual === 'Idoso' ? 'selected' : '' ?>>Idoso</option>
+            <option value="Cuidador" <?= $tipoAtual === 'Cuidador' ? 'selected' : '' ?>>Cuidador</option>
+            <option value="Familiar" <?= $tipoAtual === 'Familiar' ? 'selected' : '' ?>>Familiar</option>
+            <option value="Administrador" <?= $tipoAtual === 'Administrador' ? 'selected' : '' ?>>Administrador</option>
+        </select>
+    </label>
+    <?php if (isset($errors['tipo_usuario'])): ?>
+        <p class="erro"><?= e($errors['tipo_usuario']) ?></p>
     <?php endif; ?>
 
     <div class="acoes-form">
