@@ -10,24 +10,49 @@ use App\Validators\ExercicioValidator;
 
 class ExercicioController
 {
+    public function __construct()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    private function render(string $view, array $data = []): void
+    {
+        extract($data);
+        $viewFile = __DIR__ . '/../views/' . $view . '.php';
+        ob_start();
+        if (file_exists($viewFile)) {
+            require $viewFile;
+        }
+        $content = ob_get_clean();
+        require __DIR__ . '/../views/layouts/main.php';
+    }
+
     public function index(): void
     {
         $exercicios = Exercicio::all();
-        $title = "Listagem de Exercícios";
 
-        require __DIR__ . '/../views/exercicios/index.php';
+        $this->render('exercicios/index', [
+            'title' => 'Listagem de Exercícios',
+            'exercicios' => $exercicios,
+        ]);
     }
 
     public function create(): void
     {
-        $title = "Novo Exercício";
         $csrf = $_SESSION['csrf'] ?? '';
         $old = $_SESSION['old'] ?? [];
         $errors = $_SESSION['errors'] ?? [];
 
         unset($_SESSION['old'], $_SESSION['errors']);
 
-        require __DIR__ . '/../views/exercicios/form.php';
+        $this->render('exercicios/form', [
+            'title' => 'Novo Exercício',
+            'csrf' => $csrf,
+            'old' => $old,
+            'errors' => $errors,
+        ]);
     }
 
     public function store(): void
