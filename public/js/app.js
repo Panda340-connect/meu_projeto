@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Validação existente de formulário com data-validate
     var form = document.querySelector('form[data-validate]');
     if (form) {
         form.addEventListener('submit', function (ev) {
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Máscara para horário (HH:MM) em inputs com name="horario" ou data-mask="time"
     document.querySelectorAll('[name="horario"], [data-mask="time"]').forEach(function (input) {
         if (input.type === 'text') {
             input.addEventListener('input', function () {
@@ -24,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    
+    // Máscara para telefone (se existir campo name="telefone" ou data-mask="phone")
     document.querySelectorAll('[name="telefone"], [data-mask="phone"]').forEach(function (input) {
         input.addEventListener('input', function () {
             var v = input.value.replace(/\D/g, '').slice(0, 11);
