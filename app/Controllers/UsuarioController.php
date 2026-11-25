@@ -85,5 +85,6 @@ class UsuarioController
         Usuario::delete($id);
         header('Location: ' . url('usuario/index'));
         exit;
+    
     }
 }
