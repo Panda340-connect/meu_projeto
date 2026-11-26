@@ -1,4 +1,40 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Controle de tamanho da fonte (A+ / A-)
+    var rootEl = document.documentElement;
+    var minFontSize = 14;
+    var maxFontSize = 22;
+    var stepFontSize = 2;
+
+    var savedFontSize = parseInt(localStorage.getItem('bv_font_size'), 10);
+    if (!isNaN(savedFontSize) && savedFontSize >= minFontSize && savedFontSize <= maxFontSize) {
+        rootEl.style.fontSize = savedFontSize + 'px';
+    }
+
+    function getCurrentFontSize() {
+        var computed = window.getComputedStyle(rootEl).fontSize;
+        var parsed = parseFloat(computed);
+        return isNaN(parsed) ? 16 : parsed;
+    }
+
+    var btnIncrease = document.getElementById('btn-fonte-mais');
+    var btnDecrease = document.getElementById('btn-fonte-menos');
+
+    if (btnIncrease) {
+        btnIncrease.addEventListener('click', function () {
+            var nextSize = Math.min(maxFontSize, getCurrentFontSize() + stepFontSize);
+            rootEl.style.fontSize = nextSize + 'px';
+            localStorage.setItem('bv_font_size', String(nextSize));
+        });
+    }
+
+    if (btnDecrease) {
+        btnDecrease.addEventListener('click', function () {
+            var nextSize = Math.max(minFontSize, getCurrentFontSize() - stepFontSize);
+            rootEl.style.fontSize = nextSize + 'px';
+            localStorage.setItem('bv_font_size', String(nextSize));
+        });
+    }
+
     // Validação existente de formulário com data-validate
     var form = document.querySelector('form[data-validate]');
     if (form) {
