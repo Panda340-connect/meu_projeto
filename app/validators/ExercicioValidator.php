@@ -4,35 +4,44 @@ namespace App\Validators;
 
 class ExercicioValidator
 {
-    public static function validate(array $dados): array
+    public static function validate(array $dados, bool $isUpdate = false): array
     {
         $erros = [];
 
-        if (empty(trim($dados['nome'] ?? ''))) {
+        $nome = trim($dados['nome'] ?? '');
+        if ($nome === '') {
             $erros['nome'] = 'O nome do exercício é obrigatório.';
+        } elseif (mb_strlen($nome) > 100) {
+            $erros['nome'] = 'O nome deve ter no máximo 100 caracteres.';
         }
 
-        if (empty($dados['id_usuario'] ?? '')) {
-            $erros['id_usuario'] = 'O usuário é obrigatório.';
+        $idUsuario = $dados['id_usuario'] ?? '';
+        if ($idUsuario === '' || !is_numeric($idUsuario) || (int)$idUsuario <= 0) {
+            $erros['id_usuario'] = 'Informe um ID de usuário válido.';
         }
 
-        if (empty(trim($dados['descricao'] ?? ''))) {
+        $descricao = trim($dados['descricao'] ?? '');
+        if ($descricao === '') {
             $erros['descricao'] = 'A descrição é obrigatória.';
         }
 
-        if (empty(trim($dados['frequencia'] ?? ''))) {
+        $frequencia = trim($dados['frequencia'] ?? '');
+        if ($frequencia === '') {
             $erros['frequencia'] = 'A frequência é obrigatória.';
         }
 
-        if (empty(trim($dados['duracao'] ?? ''))) {
+        $duracao = trim($dados['duracao'] ?? '');
+        if ($duracao === '') {
             $erros['duracao'] = 'A duração é obrigatória.';
         }
 
-        if (empty($dados['data_exercicio'] ?? '')) {
+        $dataExercicio = trim($dados['data_exercicio'] ?? '');
+        if ($dataExercicio === '') {
             $erros['data_exercicio'] = 'A data do exercício é obrigatória.';
         }
 
-        if (empty($dados['horario'] ?? '')) {
+        $horario = trim($dados['horario'] ?? '');
+        if ($horario === '') {
             $erros['horario'] = 'O horário é obrigatório.';
         }
 
