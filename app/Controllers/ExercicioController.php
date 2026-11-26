@@ -10,55 +10,30 @@ use App\Validators\ExercicioValidator;
 
 class ExercicioController
 {
-    public function __construct()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
-
-    private function render(string $view, array $data = []): void
-    {
-        extract($data);
-        $viewFile = __DIR__ . '/../views/' . $view . '.php';
-        ob_start();
-        if (file_exists($viewFile)) {
-            require $viewFile;
-        }
-        $content = ob_get_clean();
-        require __DIR__ . '/../views/layouts/main.php';
-    }
-
     public function index(): void
     {
         $exercicios = Exercicio::all();
+        $title = "Listagem de Exercícios";
 
-        $this->render('exercicios/index', [
-            'title' => 'Listagem de Exercícios',
-            'exercicios' => $exercicios,
-        ]);
+        require __DIR__ . '/../views/exercicios/index.php';
     }
 
     public function create(): void
     {
+        $title = "Novo Exercício";
         $csrf = $_SESSION['csrf'] ?? '';
         $old = $_SESSION['old'] ?? [];
         $errors = $_SESSION['errors'] ?? [];
 
         unset($_SESSION['old'], $_SESSION['errors']);
 
-        $this->render('exercicios/form', [
-            'title' => 'Novo Exercício',
-            'csrf' => $csrf,
-            'old' => $old,
-            'errors' => $errors,
-        ]);
+        require __DIR__ . '/../views/exercicios/form.php';
     }
 
     public function store(): void
     {
         $data = $_POST;
-        $errors = ExercicioValidator::validate($data);
+        $errors = ExercicioValidator::validate($data, false);
 
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
@@ -68,6 +43,49 @@ class ExercicioController
         }
 
         Exercicio::create($data);
+        header('Location: ' . url('exercicio/index'));
+        exit;
+    }
+
+    public function edit(int $id): void
+    {
+        $exercicio = Exercicio::find($id);
+
+        if (!$exercicio) {
+            header('Location: ' . url('exercicio/index'));
+            exit;
+        }
+
+        $title = "Editar Exercício";
+        $csrf = $_SESSION['csrf'] ?? '';
+        $old = $_SESSION['old'] ?? $exercicio;
+        $errors = $_SESSION['errors'] ?? [];
+
+        unset($_SESSION['old'], $_SESSION['errors']);
+
+        require __DIR__ . '/../views/exercicios/edit.php';
+    }
+
+    public function update(int $id): void
+    {
+        $data = $_POST;
+        $errors = ExercicioValidator::validate($data, true);
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $data;
+            header('Location: ' . url('exercicio/edit/' . $id));
+            exit;
+        }
+
+        Exercicio::update($id, $data);
+        header('Location: ' . url('exercicio/index'));
+        exit;
+    }
+
+    public function delete(int $id): void
+    {
+        Exercicio::delete($id);
         header('Location: ' . url('exercicio/index'));
         exit;
     }
