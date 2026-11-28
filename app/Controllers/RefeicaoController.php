@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Models\Refeicao;
+use App\Models\Usuario;
 use App\Validators\RefeicaoValidator;
 
 require_once __DIR__ . '/../models/Refeicao.php';
+require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../validators/RefeicaoValidator.php';
 
 class RefeicaoController
@@ -52,7 +54,7 @@ class RefeicaoController
 
     public function create(): void
     {
-        $usuarios = Refeicao::getUsuarios();
+        $usuarios = Usuario::allByTipo('idoso');
         $this->render('refeicoes/form', [
             'title' => 'Cadastrar Refeição',
             'usuarios' => $usuarios,
@@ -67,7 +69,7 @@ class RefeicaoController
         $errors = RefeicaoValidator::validate($data);
 
         if (!empty($errors)) {
-            $usuarios = Refeicao::getUsuarios();
+            $usuarios = Usuario::allByTipo('idoso');
             $this->render('refeicoes/form', [
                 'title' => 'Cadastrar Refeição',
                 'usuarios' => $usuarios,
@@ -92,7 +94,7 @@ class RefeicaoController
             exit;
         }
 
-        $usuarios = Refeicao::getUsuarios();
+        $usuarios = Usuario::allByTipo('idoso');
         $this->render('refeicoes/edit', [
             'title' => 'Editar Refeição',
             'refeicao' => $refeicao,
@@ -113,7 +115,7 @@ class RefeicaoController
         $errors = RefeicaoValidator::validate($data);
 
         if (!empty($errors)) {
-            $usuarios = Refeicao::getUsuarios();
+            $usuarios = Usuario::allByTipo('idoso');
             $data['id_refeicao'] = $id;
             $this->render('refeicoes/edit', [
                 'title' => 'Editar Refeição',
