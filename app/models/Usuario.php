@@ -14,6 +14,19 @@ class Usuario
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function allByTipo(string $tipo): array
+    {
+        $db = Database::connect();
+        $stmt = $db->prepare(
+            "SELECT id_usuario, nome, email, telefone, tipo_usuario
+             FROM usuario
+             WHERE LOWER(TRIM(tipo_usuario)) = LOWER(?)
+             ORDER BY nome ASC"
+        );
+        $stmt->execute([trim($tipo)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function find(int $id): ?array
     {
         $db = Database::connect();
@@ -29,11 +42,11 @@ class Usuario
         $sql = "INSERT INTO usuario (nome, email, senha, telefone, tipo_usuario) VALUES (?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
         $stmt->execute([
-            $data['nome'] ?? '',
-            $data['email'] ?? '',
-            password_hash($data['senha'] ?? '', PASSWORD_DEFAULT),
+            trim((string) ($data['nome'] ?? '')),
+            trim((string) ($data['email'] ?? '')),
+            password_hash((string) ($data['senha'] ?? ''), PASSWORD_DEFAULT),
             $data['telefone'] ?? null,
-            $data['tipo_usuario'] ?? 'Idoso'
+            trim((string) ($data['tipo_usuario'] ?? 'Idoso'))
         ]);
         return (int) $db->lastInsertId();
     }
@@ -46,11 +59,11 @@ class Usuario
             $sql = "UPDATE usuario SET nome = ?, email = ?, senha = ?, telefone = ?, tipo_usuario = ? WHERE id_usuario = ?";
             $stmt = $db->prepare($sql);
             return $stmt->execute([
-                $data['nome'] ?? '',
-                $data['email'] ?? '',
-                password_hash($data['senha'], PASSWORD_DEFAULT),
+                trim((string) ($data['nome'] ?? '')),
+                trim((string) ($data['email'] ?? '')),
+                password_hash((string) $data['senha'], PASSWORD_DEFAULT),
                 $data['telefone'] ?? null,
-                $data['tipo_usuario'] ?? 'Idoso',
+                trim((string) ($data['tipo_usuario'] ?? 'Idoso')),
                 $id
             ]);
         }
@@ -58,10 +71,10 @@ class Usuario
         $sql = "UPDATE usuario SET nome = ?, email = ?, telefone = ?, tipo_usuario = ? WHERE id_usuario = ?";
         $stmt = $db->prepare($sql);
         return $stmt->execute([
-            $data['nome'] ?? '',
-            $data['email'] ?? '',
+            trim((string) ($data['nome'] ?? '')),
+            trim((string) ($data['email'] ?? '')),
             $data['telefone'] ?? null,
-            $data['tipo_usuario'] ?? 'Idoso',
+            trim((string) ($data['tipo_usuario'] ?? 'Idoso')),
             $id
         ]);
     }
