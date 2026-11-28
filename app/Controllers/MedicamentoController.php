@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Models\Medicamento;
+use App\Models\Usuario;
 use App\Validators\MedicamentoValidator;
 
 require_once __DIR__ . '/../models/Medicamento.php';
+require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../validators/MedicamentoValidator.php';
 
 class MedicamentoController
@@ -52,7 +54,7 @@ class MedicamentoController
 
     public function create(): void
     {
-        $usuarios = Medicamento::getUsuarios();
+        $usuarios = Usuario::allByTipo('idoso');
         $this->render('medicamentos/form', [
             'title' => 'Cadastrar Medicamento',
             'usuarios' => $usuarios,
@@ -67,7 +69,7 @@ class MedicamentoController
         $errors = MedicamentoValidator::validate($data);
 
         if (!empty($errors)) {
-            $usuarios = Medicamento::getUsuarios();
+            $usuarios = Usuario::allByTipo('idoso');
             $this->render('medicamentos/form', [
                 'title' => 'Cadastrar Medicamento',
                 'usuarios' => $usuarios,
@@ -92,7 +94,7 @@ class MedicamentoController
             exit;
         }
 
-        $usuarios = Medicamento::getUsuarios();
+        $usuarios = Usuario::allByTipo('idoso');
         $this->render('medicamentos/edit', [
             'title' => 'Editar Medicamento',
             'medicamento' => $medicamento,
@@ -113,7 +115,7 @@ class MedicamentoController
         $errors = MedicamentoValidator::validate($data);
 
         if (!empty($errors)) {
-            $usuarios = Medicamento::getUsuarios();
+            $usuarios = Usuario::allByTipo('idoso');
             $data['id_medicamento'] = $id;
             $this->render('medicamentos/edit', [
                 'title' => 'Editar Medicamento',
