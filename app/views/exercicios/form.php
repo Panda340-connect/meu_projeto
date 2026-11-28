@@ -1,3 +1,7 @@
+<?php
+$selectedUsuario = (string) ($old['id_usuario'] ?? '');
+?>
+
 <h1 class="mb-4"><?= e($title ?? 'Novo Exercício') ?></h1>
 
 <form action="<?= url('exercicio/store') ?>" method="POST" class="row g-3">
@@ -14,8 +18,18 @@
     </div>
 
     <div class="col-md-6">
-        <label for="id_usuario" class="form-label">ID do usuário</label>
-        <input type="number" id="id_usuario" name="id_usuario" class="form-control" value="<?= e($old['id_usuario'] ?? '') ?>" required>
+        <label for="id_usuario" class="form-label">Idoso</label>
+        <select id="id_usuario" name="id_usuario" class="form-select" required>
+            <option value="">Selecione um idoso</option>
+            <?php foreach (($usuarios ?? []) as $u): ?>
+                <option value="<?= e((string) $u['id_usuario']) ?>" <?= $selectedUsuario === (string) $u['id_usuario'] ? 'selected' : '' ?>>
+                    <?= e($u['nome']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <?php if (empty($usuarios)): ?>
+            <div class="form-text text-warning">Nenhum usuário do tipo Idoso cadastrado ainda.</div>
+        <?php endif; ?>
         <?php if (!empty($errors['id_usuario'])): ?>
             <div class="text-danger small mt-1"><?= e($errors['id_usuario']) ?></div>
         <?php endif; ?>
