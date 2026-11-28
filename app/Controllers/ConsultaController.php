@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Models\Consulta;
+use App\Models\Usuario;
 use App\Validators\ConsultaValidator;
 
 require_once __DIR__ . '/../models/Consulta.php';
+require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../validators/ConsultaValidator.php';
 
 class ConsultaController
@@ -52,7 +54,7 @@ class ConsultaController
 
     public function create(): void
     {
-        $usuarios = Consulta::getUsuarios();
+        $usuarios = Usuario::allByTipo('idoso');
         $this->render('consultas/form', [
             'title'    => 'Agendar Consulta',
             'usuarios' => $usuarios,
@@ -67,7 +69,7 @@ class ConsultaController
         $errors = ConsultaValidator::validate($data);
 
         if (!empty($errors)) {
-            $usuarios = Consulta::getUsuarios();
+            $usuarios = Usuario::allByTipo('idoso');
             $this->render('consultas/form', [
                 'title'    => 'Agendar Consulta',
                 'usuarios' => $usuarios,
@@ -92,7 +94,7 @@ class ConsultaController
             exit;
         }
 
-        $usuarios = Consulta::getUsuarios();
+        $usuarios = Usuario::allByTipo('idoso');
         $this->render('consultas/edit', [
             'title'    => 'Editar Consulta',
             'consulta' => $consulta,
@@ -113,7 +115,7 @@ class ConsultaController
         $errors = ConsultaValidator::validate($data);
 
         if (!empty($errors)) {
-            $usuarios = Consulta::getUsuarios();
+            $usuarios = Usuario::allByTipo('idoso');
             $data['id_consulta'] = $id;
             $this->render('consultas/edit', [
                 'title'    => 'Editar Consulta',
